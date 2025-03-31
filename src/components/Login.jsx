@@ -11,6 +11,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const handleLogin = async () => {
     try {
       const response = await axios.post(
@@ -21,53 +22,57 @@ const Login = () => {
       dispatch(addUser(response.data));
       navigate("/");
     } catch (err) {
-      setError(err?.response?.data);
+      setError(err?.response?.data || "Login failed. Please try again.");
     }
   };
 
   return (
-    <div className="flex justify-center items-center mt-8">
-      <div className="card bg-slate-300 text-primary-content w-80 flex">
-        <div className="card-body">
-          <label className="form-control w-full max-w-xs">
-            <div className="label">
-              <span className=" text-slate-700 text-lg font-bold opacity-100">
-                Enter your Email
-              </span>
-            </div>
-            <input
-              type="text"
-              value={emailId}
-              placeholder="Type here"
-              className="input input-bordered w-full max-w-xs"
-              onChange={(e) => setEmailId(e.target.value)}
-            />
+    <div className="flex justify-center items-center h-screen bg-gradient-to-r from-indigo-500 to-purple-500">
+      <div className="bg-white shadow-lg rounded-lg p-8 w-96">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">
+          Login
+        </h2>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">
+            Email
           </label>
-
-          <label className="form-control w-full max-w-xs">
-            <div className="label">
-              <span className=" text-slate-700 text-lg font-bold opacity-100">
-                Enter your password
-              </span>
-            </div>
-            <input
-              type="text"
-              value={password}
-              placeholder="Type here"
-              className="input input-bordered w-full max-w-xs"
-              onChange={(e) => setPassword(e?.target?.value)}
-            />
+          <input
+            type="email"
+            value={emailId}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            placeholder="Enter your email"
+            onChange={(e) => setEmailId(e.target.value)}
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">
+            Password
           </label>
-          <p className=" text-red-600">{error}</p>
-
-          <div className="card-actions">
-            <button
-              className="btn w-18 "
-              onClick={handleLogin}
+          <input
+            type="password"
+            value={password}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            placeholder="Enter your password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        <button
+          onClick={handleLogin}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition duration-300"
+        >
+          Login
+        </button>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <a
+              href="/signup"
+              className="text-indigo-500 hover:underline"
             >
-              Login
-            </button>
-          </div>
+              Sign Up
+            </a>
+          </p>
         </div>
       </div>
     </div>

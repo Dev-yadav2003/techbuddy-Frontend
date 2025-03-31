@@ -11,6 +11,7 @@ const Body = () => {
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const getUser = async () => {
     if (user) return;
     try {
@@ -19,7 +20,7 @@ const Body = () => {
       });
       dispatch(addUser(res.data));
     } catch (err) {
-      if (err.status === 401) {
+      if (err.response?.status === 401) {
         navigate("/login");
       }
       console.error(err.message);
@@ -31,10 +32,16 @@ const Body = () => {
   }, []);
 
   return (
-    <div>
-      <Navbar />
-      <Outlet />
-      <Footer />
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-200 to-gray-300">
+      <div className="bg-blue-900 text-white shadow-md">
+        <Navbar />
+      </div>
+      <main className="flex-grow container mx-auto px-4 md:px-8 lg:px-16 py-6">
+        <Outlet />
+      </main>
+      <div className="bg-blue-400 text-white shadow-md">
+        <Footer />
+      </div>
     </div>
   );
 };
