@@ -42,7 +42,7 @@ function Navbar() {
             {user?.firstName} {user?.lastName}
           </p>
 
-          <div className="relative group">
+          <div className="relative group ">
             <motion.div
               className="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-500 shadow-lg cursor-pointer transition-all duration-300 group-hover:scale-110 group-hover:shadow-blue-300"
               whileTap={{ scale: 0.9 }}
@@ -54,7 +54,7 @@ function Navbar() {
               />
             </motion.div>
 
-            <ul className="absolute right-0 mt-3 w-44 bg-indigo-400 shadow-xl rounded-lg p-2 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
+            <ul className="absolute right-0 top-full mt-3 w-44 bg-indigo-400 shadow-xl rounded-lg p-2 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 z-50">
               <li>
                 <Link
                   to="/profile"
@@ -64,9 +64,12 @@ function Navbar() {
                 </Link>
               </li>
               <li>
-                <button className="block w-full text-left px-4 py-2 hover:bg-blue-100 rounded-md">
-                  Settings
-                </button>
+                <Link
+                  to="/connections"
+                  className="block w-full text-left px-4 py-2 hover:bg-blue-100 rounded-md"
+                >
+                  Connections
+                </Link>
               </li>
               <li>
                 <button

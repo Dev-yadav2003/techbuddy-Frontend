@@ -6,44 +6,35 @@ import { addFeed } from "../utils/feedSlice";
 import UserCard from "./UserCard";
 
 const Feed = () => {
-  const dispatch = useDispatch();
   const feed = useSelector((store) => store.feed);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  useEffect(() => {
-    const getFeed = async () => {
-      if (!feed?.data || feed?.data.length === 0) {
-        try {
-          const res = await axios.get(Api_Url + "/user/feed", {
-            withCredentials: true,
-          });
-          console.log("Feed Data:", res.data);
-          dispatch(addFeed(res?.data));
-        } catch (err) {
-          console.error(err.message);
-        }
-      }
-    };
+  const dispatch = useDispatch();
 
-    getFeed();
-  }, []);
-
-  const handleNext = () => {
-    if (feed?.data && currentIndex < feed.data.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+  const getFeed = async () => {
+    if (feed) return;
+    try {
+      const res = await axios.get(Api_Url + "/user/feed", {
+        withCredentials: true,
+      });
+      dispatch(addFeed(res?.data?.data));
+    } catch (err) {
+      console.error(err.message);
     }
   };
 
-  if (!feed?.data || feed.data.length === 0) {
-    return <h1 className="flex justify-center my-10">No new users found!</h1>;
-  }
+  useEffect(() => {
+    getFeed();
+  }, []);
+  if (!feed) return;
+
+  if (feed.length <= 0)
+    return <h1 className="flex justify-center my-10">No new users founds!</h1>;
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <UserCard
-        user={feed.data[currentIndex]}
-        handleNext={handleNext}
-      />
-    </div>
+    feed && (
+      <div className="flex justify-center my-10">
+        <UserCard user={feed[0]} />
+      </div>
+    )
   );
 };
 

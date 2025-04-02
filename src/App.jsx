@@ -3,7 +3,7 @@ import Body from "./components/Body";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Feed from "./components/Feed";
-
+import Connection from "./components/Connection";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import createStore from "./utils/appStore";
 
@@ -28,6 +28,10 @@ function App() {
               <Route
                 path="/profile"
                 element={<Profile />}
+              />
+              <Route
+                path="/connections"
+                element={<Connection />}
               />
             </Route>
           </Routes>

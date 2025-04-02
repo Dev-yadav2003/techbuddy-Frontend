@@ -1,7 +1,25 @@
 import React from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { Api_Url } from "../utils/constants";
+import { useDispatch } from "react-redux";
+import { removeUserFromFeed } from "../utils/feedSlice";
 
-const UserCard = ({ user, handleNext }) => {
+const UserCard = ({ user }) => {
+  const dispatch = useDispatch();
+  const userRequest = async (status, userId) => {
+    try {
+      const res = await axios.post(
+        Api_Url + "/request/send/" + status + "/" + userId,
+        {},
+        { withCredentials: true }
+      );
+      dispatch(removeUserFromFeed(userId));
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
   return (
     <motion.div
       className="relative bg-white w-96 shadow-xl rounded-2xl border-2 overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-[0_10px_40px_rgba(255,20,147,0.3),0_10px_40px_rgba(30,144,255,0.3)]"
@@ -28,7 +46,7 @@ const UserCard = ({ user, handleNext }) => {
           <motion.button
             className="px-5 py-2 bg-red-500 text-white font-semibold rounded-full shadow-md hover:bg-red-600 transition-all scale-100 hover:scale-110"
             whileTap={{ scale: 0.9 }}
-            onClick={handleNext}
+            onClick={() => userRequest("ignored", user?._id)}
           >
             ❌ Reject
           </motion.button>
@@ -36,7 +54,7 @@ const UserCard = ({ user, handleNext }) => {
           <motion.button
             className="px-5 py-2 bg-green-500 text-white font-semibold rounded-full shadow-md hover:bg-green-600 transition-all scale-100 hover:scale-110"
             whileTap={{ scale: 0.9 }}
-            onClick={handleNext}
+            onClick={() => userRequest("intrested", user?._id)}
           >
             ❤️ Interested
           </motion.button>
