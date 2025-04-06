@@ -13,7 +13,6 @@ const Body = () => {
   const navigate = useNavigate();
 
   const getUser = async () => {
-    if (user) return;
     try {
       const res = await axios.get(Api_Url + "/profile/view", {
         withCredentials: true,
@@ -33,9 +32,6 @@ const Body = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-200 to-gray-300">
-      <div className="bg-blue-900 text-white shadow-md">
-        <Navbar />
-      </div>
       <main className="flex-grow container mx-auto px-4 md:px-8 lg:px-16 py-6">
         <Outlet />
       </main>

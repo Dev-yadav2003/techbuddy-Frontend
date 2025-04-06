@@ -30,7 +30,7 @@ function Navbar() {
       transition={{ duration: 0.5 }}
     >
       <Link
-        to={user ? "/" : "#"}
+        to="/"
         className="text-2xl font-bold text-gray-800 tracking-wide"
       >
         Tech<span className="text-blue-500">Buddy</span>
@@ -38,7 +38,7 @@ function Navbar() {
 
       {user && (
         <div className="flex items-center gap-5">
-          <p className="text-lg text-gray-900 font-bold">
+          <p className="text-lg text-white font-bold">
             {user?.firstName} {user?.lastName}
           </p>
 
@@ -69,6 +69,12 @@ function Navbar() {
                   className="block w-full text-left px-4 py-2 hover:bg-blue-100 rounded-md"
                 >
                   Connections
+                </Link>
+                <Link
+                  to="/requests"
+                  className="block w-full text-left px-4 py-2 hover:bg-blue-100 rounded-md"
+                >
+                  Requests
                 </Link>
               </li>
               <li>

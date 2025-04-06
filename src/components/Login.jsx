@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/appSlice";
+import { removeFeed } from "../utils/feedSlice";
 import { useNavigate } from "react-router-dom";
 import { Api_Url } from "../utils/constants";
 
@@ -20,9 +21,12 @@ const Login = () => {
         { withCredentials: true }
       );
       dispatch(addUser(response.data));
+      dispatch(removeFeed());
       navigate("/");
     } catch (err) {
-      setError(err?.response?.data || "Login failed. Please try again.");
+      const message =
+        err?.response?.data?.message || "Login failed. Please try again.";
+      setError(message);
     }
   };
 

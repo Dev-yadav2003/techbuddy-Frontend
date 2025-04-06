@@ -4,40 +4,47 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Feed from "./components/Feed";
 import Connection from "./components/Connection";
+import Requests from "./components/Requests";
+import Navbar from "./components/Navbar";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import createStore from "./utils/appStore";
 
 function App() {
   return (
-    <div>
-      <Provider store={createStore}>
-        <BrowserRouter>
-          <Routes>
+    <Provider store={createStore}>
+      <BrowserRouter>
+        <div className="bg-blue-800 text-white shadow-md">
+          <Navbar />
+        </div>
+        <Routes>
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+          <Route
+            path="/"
+            element={<Body />}
+          >
             <Route
-              path="/"
-              element={<Body />}
-            >
-              <Route
-                path="/"
-                element={<Feed />}
-              />
-              <Route
-                path="/login"
-                element={<Login />}
-              />
-              <Route
-                path="/profile"
-                element={<Profile />}
-              />
-              <Route
-                path="/connections"
-                element={<Connection />}
-              />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </Provider>
-    </div>
+              index
+              element={<Feed />}
+            />
+            <Route
+              path="profile"
+              element={<Profile />}
+            />
+            <Route
+              path="connections"
+              element={<Connection />}
+            />
+            <Route
+              path="requests"
+              element={<Requests />}
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </Provider>
   );
 }
 

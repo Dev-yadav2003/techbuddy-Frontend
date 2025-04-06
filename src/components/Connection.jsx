@@ -25,43 +25,45 @@ const Connection = () => {
     return <p className="text-center text-3xl">No Connection Found</p>;
   }
   return (
-    <div className=" flex justify-center flex-col items-center">
-      <h1 className=" text-3xl text-zinc-800 text-center font-bold mb-4">
+    <div className="flex flex-col items-center px-4 py-6">
+      <h1 className="text-2xl sm:text-3xl text-zinc-800 text-center font-bold mb-6">
         Connections
       </h1>
-      {connection.map((connection) => (
+
+      {connection.map((conn) => (
         <div
-          key={connection._id}
-          className="flex items-center justify-between mb-6 border-4 border-blue-600
-                   shadow-lg rounded-lg p-4 w-1/2 bg-white transition-transform transform hover:scale-105"
+          key={conn._id}
+          className="flex flex-col sm:flex-row items-center sm:justify-between mb-6 border-2 border-blue-600
+                   shadow-md rounded-xl p-4 w-full sm:w-3/4 md:w-2/3 lg:w-1/2 bg-white 
+                   transition-transform transform hover:scale-105"
         >
-          <div className="flex items-center space-x-4">
-            <img
-              className="w-24 h-24 rounded-full border-2  "
-              alt="photo"
-              src={connection.profile}
-            />
-            <div className=" flex flex-col w-3/4">
-              <span className="text-lg font-semibold text-gray-700">
-                {connection.firstName}
-              </span>
-              <div>
-                <span className="text-lg font-semibold text-gray-700">
-                  {connection.age}
+          <img
+            className="w-24 h-24 rounded-full border-2 mb-4 sm:mb-0 sm:mr-6"
+            alt="profile"
+            src={conn.profile}
+          />
+
+          <div className="flex flex-col gap-2 text-center sm:text-left w-full">
+            <span className="text-lg font-semibold text-gray-700">
+              {conn.firstName}
+            </span>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-gray-600 text-sm">
+              <span>{conn.age} years</span>
+              <span>{conn.gender}</span>
+            </div>
+
+            <p className="text-sm text-gray-600">{conn.about}</p>
+
+            <div className="flex flex-wrap gap-2 mt-1">
+              {conn.skills?.map((skill, idx) => (
+                <span
+                  key={idx}
+                  className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs"
+                >
+                  {skill}
                 </span>
-                <span className="text-lg font-semibold text-gray-700">
-                  {connection.gender}
-                </span>
-              </div>
-              <span className="text-lg font-semibold text-gray-700">
-                {connection.about}
-              </span>
-              <span className="text-lg font-semibold text-gray-700">
-                {connection.skills}
-              </span>
-              <span className="text-lg font-semibold text-gray-700">
-                {connection.age}
-              </span>
+              ))}
             </div>
           </div>
         </div>
