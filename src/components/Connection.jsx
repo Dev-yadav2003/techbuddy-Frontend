@@ -3,9 +3,12 @@ import React, { useEffect } from "react";
 import { Api_Url } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { addConnection } from "../utils/connectionSlice";
+import { Link } from "react-router-dom";
+
 const Connection = () => {
   const connection = useSelector((store) => store.connection);
   const dispatch = useDispatch();
+
   const handleConnections = async () => {
     try {
       const res = await axios.get(Api_Url + "/user/connection", {
@@ -16,16 +19,18 @@ const Connection = () => {
       console.error(err.message);
     }
   };
+
   useEffect(() => {
     handleConnections();
   }, []);
 
   if (!connection) return;
   if (connection.length === 0) {
-    return <p className="text-center text-3xl">No Connection Found</p>;
+    return <p className="text-center text-3xl mt-10">No Connection Found</p>;
   }
+
   return (
-    <div className="flex flex-col items-center px-4 py-6">
+    <div className="flex flex-col items-center px-4 py-6 ">
       <h1 className="text-2xl sm:text-3xl text-zinc-800 text-center font-bold mb-6">
         Connections
       </h1>
@@ -43,29 +48,38 @@ const Connection = () => {
             src={conn.profile}
           />
 
-          <div className="flex flex-col gap-2 text-center sm:text-left w-full">
-            <span className="text-lg font-semibold text-gray-700">
-              {conn.firstName}
-            </span>
+          <div className="flex flex-col w-full">
+            <div className="flex flex-col gap-2 text-center sm:text-left w-full">
+              <span className="text-lg font-semibold text-gray-700">
+                {conn.firstName}
+              </span>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-gray-600 text-sm">
-              <span>{conn.age} years</span>
-              <span>{conn.gender}</span>
+              <div className="flex justify-center sm:justify-start flex-row gap-4 text-gray-600 text-sm">
+                <span>{conn.age} years</span>
+                <span>{conn.gender}</span>
+              </div>
+
+              <p className="text-sm text-gray-600">{conn.about}</p>
             </div>
 
-            <p className="text-sm text-gray-600">{conn.about}</p>
-
-            <div className="flex flex-wrap gap-2 mt-1">
-              {conn.skills?.map((skill, idx) => (
-                <span
-                  key={idx}
-                  className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs"
-                >
-                  {skill}
-                </span>
-              ))}
+            <div className="flex justify-center sm:justify-start">
+              <div className="flex flex-wrap gap-2 mt-4">
+                {conn.skills?.map((skill, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
+          <Link to={"/chat/" + conn._id}>
+            <button className=" border-1 bg-blue-400 text-white px-3 py-1 rounded-md ">
+              chat
+            </button>
+          </Link>
         </div>
       ))}
     </div>

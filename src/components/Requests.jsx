@@ -35,9 +35,24 @@ const Requests = () => {
   }, []);
   return (
     <div className="flex flex-col justify-between items-center px-4 py-6">
-      <h1 className="text-2xl sm:text-3xl text-zinc-800 text-center font-bold mb-6">
-        Requests
-      </h1>
+      {requests.length === 0 && (
+        <div className="flex flex-col items-center justify-center gap-7">
+          <p className="text-gray-500 mt-4 text-3xl font-bold">
+            No Requests Found
+          </p>
+
+          <img
+            alt="No requests found"
+            src="/noRequestFound.webp"
+            className="w-64 h-auto"
+          />
+        </div>
+      )}
+      {requests.length >= 1 && (
+        <h1 className="text-2xl sm:text-3xl text-zinc-800 text-center font-bold mb-6">
+          Requests
+        </h1>
+      )}
 
       {requests.map((request) => (
         <div
@@ -52,7 +67,7 @@ const Requests = () => {
             src={request.fromUserId.profile}
           />
 
-          <div className="flex flex-col gap-2 text-center sm:text-left w-full">
+          <div className="flex flex-col gap-2 text-center sm:text-left w-fit">
             <span className="text-lg font-semibold text-gray-700">
               {request.fromUserId.firstName}
             </span>
@@ -76,15 +91,15 @@ const Requests = () => {
             </div>
           </div>
 
-          <div className=" flex flex-col gap-2">
+          <div className=" flex sm:flex-col gap-2 justify-center items-center mt-3">
             <button
-              className="text-green-600 rounded-md font-bold border-green-500 border-2 p-1"
+              className="text-green-600 h-9 rounded-md font-bold border-green-500 border-2 p-1"
               onClick={() => reviewRequest("accepted", request._id)}
             >
               Accept
             </button>
             <button
-              className="text-red-600 border-red-500 rounded-md border-2 p-1 font-bold"
+              className="text-red-600 h-9 border-red-500 rounded-md border-2 p-1 font-bold"
               onClick={() => reviewRequest("rejected", request._id)}
             >
               Reject

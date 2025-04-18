@@ -24,7 +24,7 @@ function Navbar() {
 
   return (
     <motion.div
-      className="w-full bg-white-200 backdrop-blur-md shadow-md px-5 py-5 flex justify-between items-center z-50"
+      className="relative w-full z-50 bg-white-200 backdrop-blur-md shadow-md px-5 py-5 flex justify-between items-center"
       initial={{ opacity: 0, y: -30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -42,7 +42,7 @@ function Navbar() {
             {user?.firstName} {user?.lastName}
           </p>
 
-          <div className="relative group ">
+          <div className="relative group z-50 ">
             <motion.div
               className="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-500 shadow-lg cursor-pointer transition-all duration-300 group-hover:scale-110 group-hover:shadow-blue-300"
               whileTap={{ scale: 0.9 }}
@@ -58,7 +58,7 @@ function Navbar() {
               <li>
                 <Link
                   to="/profile"
-                  className="block px-4 py-2 hover:bg-blue-200 rounded-md"
+                  className="block px-4 py-2 hover:text-slate-900 hover:bg-blue-200 rounded-md"
                 >
                   Profile
                 </Link>
@@ -66,13 +66,13 @@ function Navbar() {
               <li>
                 <Link
                   to="/connections"
-                  className="block w-full text-left px-4 py-2 hover:bg-blue-100 rounded-md"
+                  className="block w-full hover:text-slate-900 text-left px-4 py-2 hover:bg-blue-100 rounded-md"
                 >
                   Connections
                 </Link>
                 <Link
                   to="/requests"
-                  className="block w-full text-left px-4 py-2 hover:bg-blue-100 rounded-md"
+                  className="block w-full text-left px-4 py-2 hover:text-slate-900 hover:bg-blue-100 rounded-md"
                 >
                   Requests
                 </Link>

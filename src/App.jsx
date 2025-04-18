@@ -8,6 +8,7 @@ import Requests from "./components/Requests";
 import Navbar from "./components/Navbar";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import createStore from "./utils/appStore";
+import Chat from "./components/Chat";
 
 function App() {
   return (
@@ -30,15 +31,19 @@ function App() {
               element={<Feed />}
             />
             <Route
-              path="profile"
+              path="/profile"
               element={<Profile />}
             />
             <Route
-              path="connections"
+              path="/connections"
               element={<Connection />}
             />
             <Route
-              path="requests"
+              path="/chat/:targetUserId"
+              element={<Chat />}
+            />
+            <Route
+              path="/requests"
               element={<Requests />}
             />
           </Route>

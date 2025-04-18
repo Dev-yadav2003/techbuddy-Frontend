@@ -28,7 +28,18 @@ const Feed = () => {
   }, [user]);
 
   if (!feed || feed.length === 0) {
-    return <h1 className="flex justify-center my-10">No new users found!</h1>;
+    return (
+      <div className="flex justify-center items-center flex-col">
+        <h1 className="text-3xl font-bold my-10">No new users found!</h1>
+        <div>
+          <img
+            className=" w-64 h-64"
+            alt="no user image"
+            src="public\noUserFound.webp"
+          />
+        </div>
+      </div>
+    );
   }
   return (
     feed && (

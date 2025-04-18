@@ -7,10 +7,11 @@ import { removeUserFromFeed } from "../utils/feedSlice";
 
 const UserCard = ({ user }) => {
   const dispatch = useDispatch();
+
   const userRequest = async (status, userId) => {
     try {
-      const res = await axios.post(
-        Api_Url + "/request/send/" + status + "/" + userId,
+      await axios.post(
+        `${Api_Url}/request/send/${status}/${userId}`,
         {},
         { withCredentials: true }
       );
@@ -20,12 +21,25 @@ const UserCard = ({ user }) => {
     }
   };
 
+  const handleDragEnd = (event, info) => {
+    const offsetX = info.offset.x;
+    if (offsetX < -100) {
+      userRequest("ignored", user._id);
+    } else if (offsetX > 100) {
+      userRequest("intrested", user._id);
+    }
+  };
+
   return (
     <motion.div
-      className="relative bg-white w-96 shadow-xl rounded-2xl border-2 overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-[0_10px_40px_rgba(255,20,147,0.3),0_10px_40px_rgba(30,144,255,0.3)]"
+      className="relative z-0 bg-white w-96 shadow-xl rounded-2xl border-2 overflow-hidden transition-transform duration-300 hover:shadow-[0_10px_40px_rgba(255,20,147,0.3),0_10px_40px_rgba(30,144,255,0.3)]"
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      onDragEnd={handleDragEnd}
+      whileDrag={{ scale: 1.05 }}
     >
       <div className="relative">
         <img
@@ -48,7 +62,7 @@ const UserCard = ({ user }) => {
             whileTap={{ scale: 0.9 }}
             onClick={() => userRequest("ignored", user?._id)}
           >
-            ❌ Reject
+            Ignore
           </motion.button>
 
           <motion.button
@@ -56,7 +70,7 @@ const UserCard = ({ user }) => {
             whileTap={{ scale: 0.9 }}
             onClick={() => userRequest("intrested", user?._id)}
           >
-            ❤️ Interested
+            Interested
           </motion.button>
         </div>
       </div>
