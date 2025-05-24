@@ -6,139 +6,158 @@ import { useDispatch } from "react-redux";
 import { addUser } from "../utils/appSlice";
 
 const EditProfile = ({ user }) => {
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-  const [skills, setSkills] = useState(user?.skills || "");
-  const [age, setAge] = useState(user?.age || "");
-  const [gender, setGender] = useState(user?.gender || "");
-  const [profile, setProfile] = useState(user?.profile || "");
-  const [about, setAbout] = useState(user?.about || "");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    skills: "",
+    age: "",
+    gender: "",
+    about: "",
+  });
+  const [profileFile, setProfileFile] = useState(null);
+  const [profileImage, setProfileImage] = useState("");
   const [error, setError] = useState("");
   const [toast, setToast] = useState(false);
   const dispatch = useDispatch();
 
-  const saveProfile = async () => {
-    setError(" ");
-    try {
-      const res = await axios.patch(
-        Api_Url + "/profile/edit",
-        {
-          firstName,
-          lastName,
-          skills,
-          age,
-          gender,
-          profile,
-          about,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-      dispatch(addUser(res?.data?.data));
-      setToast(true);
-      setTimeout(() => {
-        setToast(false);
-      }, 3000);
-    } catch (err) {
-      setError(err?.response?.data);
-    }
-  };
-
   useEffect(() => {
     if (user) {
-      setFirstName(user.firstName || "");
-      setLastName(user.lastName || "");
-      setSkills(user.skills || "");
-      setAge(user.age || "");
-      setGender(user.gender || "");
-      setProfile(user.profile || "");
-      setAbout(user.about || "");
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        skills: user.skills || "",
+        age: user.age || "",
+        gender: user.gender || "",
+        about: user.about || "",
+      });
+
+      const imageUrl = user.profile
+        ? `${Api_Url}/uploads/${user.profile.replace(/\\/g, "/")}`
+        : "";
+      setProfileImage(imageUrl);
     }
   }, [user]);
 
+  const saveProfile = async () => {
+    setError("");
+    try {
+      const formDataToSend = new FormData();
+
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataToSend.append(key, value);
+      });
+
+      if (profileFile) {
+        formDataToSend.append("profile", profileFile);
+      }
+
+      const res = await axios.patch(`${Api_Url}/profile/edit`, formDataToSend, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const updatedUser = res.data.user;
+
+      dispatch(addUser(updatedUser));
+
+      const newImageUrl = updatedUser.profile
+        ? `${Api_Url}/uploads/${updatedUser.profile.replace(/\\/g, "/")}`
+        : "";
+      setProfileImage(newImageUrl);
+      setProfileFile(null);
+      setToast(true);
+      setTimeout(() => setToast(false), 3000);
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to update profile");
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.match(/image\/(jpeg|jpg|png)/i)) {
+      setError("Only JPEG/JPG and PNG images are allowed");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be smaller than 5MB");
+      return;
+    }
+
+    setError("");
+    setProfileFile(file);
+    setProfileImage(URL.createObjectURL(file));
+  };
+
   return (
     <>
-      <div className="text-4xl md:text-5xl font-extrabold text-blue-900 text-center">
+      <div className="text-4xl text-center font-extrabold text-blue-900">
         Edit Your Profile
       </div>
-      <div className="flex w-full justify-center gap-10">
-        <div className="flex flex-col items-center w-full ">
+      <div className="flex justify-center gap-10 w-full">
+        <div className="flex flex-col items-center w-full">
           <div className="flex flex-col md:w-full w-3/4 gap-6 mt-10 border-2 border-blue-500 p-6 rounded-lg shadow-lg">
-            <div className="flex flex-col gap-2">
-              <label className="text-lg font-semibold text-blue-900">
-                First Name
-              </label>
-              <input
-                type="text"
-                placeholder="Enter first name"
-                className="input w-full bg-blue-700 text-white p-3 rounded-lg"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-            </div>
+            <Input
+              label="First Name"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+            />
+            <Input
+              label="Last Name"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+            />
+            <Input
+              label="Skills"
+              name="skills"
+              value={formData.skills}
+              onChange={handleInputChange}
+            />
+            <Input
+              label="Age"
+              name="age"
+              value={formData.age}
+              onChange={handleInputChange}
+            />
+            <Input
+              label="Gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleInputChange}
+            />
 
             <div className="flex flex-col gap-2">
               <label className="text-lg font-semibold text-blue-900">
-                Last Name
+                Profile Image
               </label>
-              <input
-                type="text"
-                placeholder="Enter last name"
-                className="input w-full bg-blue-700 text-white p-3 rounded-lg"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-lg font-semibold text-blue-900">
-                Skills
+              <label className="flex flex-col items-center px-4 py-6 bg-white rounded-lg border-2 border-dashed border-blue-300 cursor-pointer hover:bg-blue-50">
+                <div className="flex flex-col items-center justify-center">
+                  <p className="mt-2 text-sm text-gray-600">
+                    <span className="font-semibold">Click to upload</span> or
+                    drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/jpeg, image/jpg, image/png"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
               </label>
-              <input
-                type="text"
-                placeholder="Enter skills"
-                className="input w-full bg-blue-700 text-white p-3 rounded-lg"
-                value={skills}
-                onChange={(e) => setSkills(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-lg font-semibold text-blue-900">Age</label>
-              <input
-                type="text"
-                placeholder="Enter age"
-                className="input bg-blue-700 text-white p-3 rounded-lg"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-lg font-semibold text-blue-900">
-                Gender
-              </label>
-              <input
-                type="text"
-                placeholder="Enter gender"
-                className="input w-full bg-blue-700 text-white p-3 rounded-lg"
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-lg font-semibold text-blue-900">
-                Profile
-              </label>
-              <input
-                type="text"
-                placeholder="Enter profile info"
-                className="input w-full bg-blue-700 text-white p-3 rounded-lg"
-                value={profile}
-                onChange={(e) => setProfile(e.target.value)}
-              />
+              {profileFile && (
+                <p className="text-sm text-green-600">
+                  {profileFile.name} selected
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -146,15 +165,15 @@ const EditProfile = ({ user }) => {
                 About
               </label>
               <textarea
-                placeholder="Tell us about yourself"
-                className="textarea w-full bg-blue-700 text-white p-3 rounded-lg h-24"
-                value={about}
-                onChange={(e) => setAbout(e.target.value)}
-              ></textarea>
+                name="about"
+                className="textarea bg-blue-700 text-white p-3 rounded-lg h-24"
+                value={formData.about}
+                onChange={handleInputChange}
+              />
             </div>
-            <p className=" text-red-500">{error}</p>
+            <p className="text-red-500">{error}</p>
             <button
-              className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition"
+              className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition-colors"
               onClick={saveProfile}
             >
               Save Changes
@@ -163,7 +182,10 @@ const EditProfile = ({ user }) => {
         </div>
         <div className="mt-[6vh] hidden md:block w-full">
           <ProfileCard
-            user={{ firstName, lastName, gender, age, about, skills, profile }}
+            user={{
+              ...formData,
+              profile: profileImage,
+            }}
           />
         </div>
       </div>
@@ -177,5 +199,18 @@ const EditProfile = ({ user }) => {
     </>
   );
 };
+
+const Input = ({ label, name, value, onChange }) => (
+  <div className="flex flex-col gap-2">
+    <label className="text-lg font-semibold text-blue-900">{label}</label>
+    <input
+      type="text"
+      name={name}
+      className="input w-full bg-blue-700 text-white p-3 rounded-lg"
+      value={value}
+      onChange={onChange}
+    />
+  </div>
+);
 
 export default EditProfile;

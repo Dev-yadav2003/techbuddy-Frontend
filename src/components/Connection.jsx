@@ -30,7 +30,7 @@ const Connection = () => {
   }
 
   return (
-    <div className="flex flex-col items-center px-4 py-6 ">
+    <div className="flex flex-col items-center px-4 py-6">
       <h1 className="text-2xl sm:text-3xl text-zinc-800 text-center font-bold mb-6">
         Connections
       </h1>
@@ -42,11 +42,13 @@ const Connection = () => {
                    shadow-md rounded-xl p-4 w-full sm:w-3/4 md:w-2/3 lg:w-1/2 bg-white 
                    transition-transform transform hover:scale-105"
         >
-          <img
-            className="w-24 h-24 rounded-full border-2 mb-4 sm:mb-0 sm:mr-6"
-            alt="profile"
-            src={conn.profile}
-          />
+          <div className=" flex-shrink-0">
+            <img
+              className="w-24 h-24 rounded-full border-2 mb-4 sm:mb-0 sm:mr-6 object-cover overflow-hidden"
+              alt="profile"
+              src={`${Api_Url}/uploads/${conn.profile.replace(/\\/g, "/")}`}
+            />
+          </div>
 
           <div className="flex flex-col w-full">
             <div className="flex flex-col gap-2 text-center sm:text-left w-full">

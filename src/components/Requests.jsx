@@ -30,6 +30,7 @@ const Requests = () => {
       console.error(err.message);
     }
   };
+
   useEffect(() => {
     handleRequsts();
   }, []);
@@ -61,12 +62,20 @@ const Requests = () => {
                      shadow-md rounded-xl p-4 w-full sm:w-3/4 md:w-2/3 lg:w-1/2 bg-white 
                      transition-transform transform hover:scale-105"
         >
-          <img
-            className="w-24 h-24 rounded-full border-2 mb-4 sm:mb-0 sm:mr-6"
-            alt="profile"
-            src={request.fromUserId.profile}
-          />
-
+          <div className=" flex-shrink-0">
+            <img
+              className="w-24 h-24 rounded-full object-cover border-2 mb-4 sm:mb-0 sm:mr-6"
+              alt="profile"
+              src={
+                request?.fromUserId?.profile
+                  ? `${Api_Url}/uploads/${request.fromUserId.profile.replace(
+                      /\\/g,
+                      "/"
+                    )}`
+                  : ""
+              }
+            />
+          </div>
           <div className="flex flex-col gap-2 text-center sm:text-left w-fit">
             <span className="text-lg font-semibold text-gray-700">
               {request.fromUserId.firstName}

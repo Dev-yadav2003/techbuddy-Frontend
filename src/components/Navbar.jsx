@@ -22,6 +22,10 @@ function Navbar() {
     }
   };
 
+  const imageUrl = user?.profile
+    ? `${Api_Url}/uploads/${user.profile.replace(/\\/g, "/")}`
+    : "";
+
   return (
     <motion.div
       className="relative w-full z-50 bg-white-200 backdrop-blur-md shadow-md px-5 py-5 flex justify-between items-center"
@@ -42,15 +46,18 @@ function Navbar() {
             {user?.firstName} {user?.lastName}
           </p>
 
-          <div className="relative group z-50 ">
+          <div className="relative group z-50">
             <motion.div
               className="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-500 shadow-lg cursor-pointer transition-all duration-300 group-hover:scale-110 group-hover:shadow-blue-300"
               whileTap={{ scale: 0.9 }}
             >
               <img
-                src={user?.profile}
+                src={imageUrl}
                 alt="Profile"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = "/default-avatar.png";
+                }}
               />
             </motion.div>
 
