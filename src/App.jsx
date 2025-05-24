@@ -9,6 +9,7 @@ import Navbar from "./components/Navbar";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import createStore from "./utils/appStore";
 import Chat from "./components/Chat";
+const cors = require("cors");
 
 function App() {
   return (
