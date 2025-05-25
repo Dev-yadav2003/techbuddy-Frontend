@@ -23,8 +23,10 @@ function Navbar() {
   };
 
   const imageUrl = user?.profile
-    ? `${Api_Url}/uploads/${user.profile.replace(/\\/g, "/")}`
-    : "";
+    ? user.profile.startsWith("/uploads/")
+      ? `${Api_Url}${user.profile.replace(/\\/g, "/")}`
+      : user.profile
+    : "/download.png";
 
   return (
     <motion.div
@@ -56,7 +58,7 @@ function Navbar() {
                 alt="Profile"
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.target.src = "/default-avatar.png";
+                  e.target.src = "/download.png";
                 }}
               />
             </motion.div>

@@ -46,7 +46,15 @@ const Connection = () => {
             <img
               className="w-24 h-24 rounded-full border-2 mb-4 sm:mb-0 sm:mr-6 object-cover overflow-hidden"
               alt="profile"
-              src={`${Api_Url}/uploads/${conn.profile.replace(/\\/g, "/")}`}
+              src={
+                conn.profile?.includes("upload")
+                  ? `${Api_Url}/${conn.profile.replace(/\\/g, "/")}`
+                  : conn.profile || "/default-avatar.png"
+              }
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/default-avatar.png";
+              }}
             />
           </div>
 

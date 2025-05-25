@@ -67,13 +67,18 @@ const Requests = () => {
               className="w-24 h-24 rounded-full object-cover border-2 mb-4 sm:mb-0 sm:mr-6"
               alt="profile"
               src={
-                request?.fromUserId?.profile
+                request?.fromUserId?.profile &&
+                !request.fromUserId.profile.includes("download.png")
                   ? `${Api_Url}/uploads/${request.fromUserId.profile.replace(
                       /\\/g,
                       "/"
                     )}`
-                  : ""
+                  : "/download.png"
               }
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/download.png";
+              }}
             />
           </div>
           <div className="flex flex-col gap-2 text-center sm:text-left w-fit">
