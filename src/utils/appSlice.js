@@ -10,8 +10,17 @@ const userSlice = createSlice({
     removeUser: (state, action) => {
       return null;
     },
+    updateProfileImage: (state, action) => {
+      if (state) {
+        return {
+          ...state,
+          profileImageUrl: action.payload,
+        };
+      }
+      return state;
+    },
   },
 });
 
-export const { addUser, removeUser } = userSlice.actions;
+export const { addUser, removeUser, updateProfileImage } = userSlice.actions;
 export default userSlice.reducer;

@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Api_Url } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { addUser } from "../utils/appSlice";
+import { addUser } from "../utils/userSlice";
 import Footer from "./Footer";
 
 const Body = () => {
@@ -45,7 +45,7 @@ const Body = () => {
     if (!user) {
       fetchProfile();
     }
-  }, [user]);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-200 to-gray-300">
