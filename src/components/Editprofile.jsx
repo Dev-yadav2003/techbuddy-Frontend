@@ -46,10 +46,12 @@ const EditProfile = ({ user }) => {
     try {
       const formDataToSend = new FormData();
 
+      // Append all form fields
       Object.entries(formData).forEach(([key, value]) => {
         formDataToSend.append(key, value);
       });
 
+      // Append file if selected - field name 'profile' matches backend
       if (profileFile) {
         formDataToSend.append("profile", profileFile);
       }
@@ -65,19 +67,17 @@ const EditProfile = ({ user }) => {
         const updatedUser = res.data.user;
         dispatch(addUser(updatedUser));
 
-        // Update profile image in Redux
-        if (updatedUser.profileImageUrl) {
-          dispatch(updateProfileImage(updatedUser.profileImageUrl));
-        }
+        // Handle both cases - uploaded image or default image
+        const newImageUrl = updatedUser.profileImageUrl.startsWith("/uploads/")
+          ? `${Api_Url}${updatedUser.profileImageUrl}?t=${new Date().getTime()}`
+          : updatedUser.profileImageUrl;
 
+        setProfileImage(newImageUrl);
         setProfileFile(null);
         setToast(true);
         setTimeout(() => setToast(false), 3000);
-      } else {
-        setError(res.data.error || "Failed to update profile");
       }
     } catch (err) {
-      console.error("Profile update error:", err);
       setError(err.response?.data?.error || "Failed to update profile");
     } finally {
       setLoading(false);
@@ -116,9 +116,6 @@ const EditProfile = ({ user }) => {
       <div className="flex flex-col md:flex-row justify-center gap-10 w-full p-4">
         <div className="flex flex-col items-center w-full md:w-1/2">
           <div className="flex flex-col w-full gap-6 mt-10 border-2 border-blue-500 p-6 rounded-lg shadow-lg">
-            {/* Form fields remain the same */}
-            {/* ... */}
-
             <div className="flex flex-col gap-2">
               <label className="text-lg font-semibold text-blue-900">
                 Profile Image
@@ -154,9 +151,6 @@ const EditProfile = ({ user }) => {
                 </p>
               )}
             </div>
-
-            {/* Rest of the form remains the same */}
-            {/* ... */}
 
             <button
               className={`w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition-colors ${
