@@ -1,34 +1,51 @@
 import React, { useEffect } from "react";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
 import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Api_Url } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../utils/appSlice";
+import Footer from "./Footer";
 
 const Body = () => {
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const getUser = async () => {
+  const fetchProfile = async () => {
     try {
-      const res = await axios.get(Api_Url + "/profile/view", {
+      const { data } = await axios.get(`${Api_Url}/profile/view`, {
         withCredentials: true,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
       });
-      dispatch(addUser(res.data));
-    } catch (err) {
-      if (err.response?.status === 401) {
+
+      if (data?.success) {
+        dispatch(addUser(data.user));
+      } else {
+        document.cookie =
+          "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
         navigate("/login");
       }
-      console.error(err.message);
+    } catch (error) {
+      console.error("Profile fetch error:", error);
+
+      if (error.response?.status === 401) {
+        document.cookie =
+          "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+        navigate("/login");
+      } else {
+        console.error("Failed to fetch profile:", error.message);
+      }
     }
   };
 
   useEffect(() => {
-    getUser();
-  }, []);
+    if (!user) {
+      fetchProfile();
+    }
+  }, [user]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-200 to-gray-300">
