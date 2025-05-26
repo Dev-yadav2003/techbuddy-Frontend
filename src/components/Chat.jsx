@@ -59,9 +59,7 @@ const Chat = () => {
       sendMessage();
     }
   };
-  const imageUrl = user?.profile
-    ? `${Api_Url}/uploads/${user.profile.replace(/\\/g, "/")}`
-    : "";
+  const imageUrl = user?.profile;
 
   return (
     <div className="flex flex-col border-blue-800 border-2 rounded-xl md:w-1/2 mx-auto mt-10 bg-gradient-to-br from-blue-950 to-blue-900 shadow-lg h-[400px]">
