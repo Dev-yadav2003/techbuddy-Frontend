@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Api_Url } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { addUser } from "../utils/userSlice";
+import { addUser } from "../utils/appSlice";
 
 const EditProfile = () => {
   const currentUser = useSelector((store) => store.user);
@@ -48,17 +48,14 @@ const EditProfile = () => {
     try {
       const formDataToSend = new FormData();
 
-      // Append all form fields
       Object.entries(formData).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
-          // Convert skills back to array if needed
           const finalValue =
             key === "skills" ? value.split(",").map((s) => s.trim()) : value;
           formDataToSend.append(key, finalValue);
         }
       });
 
-      // Append file if selected
       if (profileFile) {
         formDataToSend.append("profileImage", profileFile);
       }
@@ -74,7 +71,6 @@ const EditProfile = () => {
         const updatedUser = res.data.user;
         dispatch(addUser(updatedUser));
 
-        // Update preview image with cache busting
         const newImageUrl = updatedUser.profileImage
           ? updatedUser.profileImage.startsWith("http")
             ? updatedUser.profileImage
