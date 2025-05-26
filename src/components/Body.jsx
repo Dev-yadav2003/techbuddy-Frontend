@@ -3,15 +3,17 @@ import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Api_Url } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { addUser } from "../utils/userSlice";
+import { setUser, setLoading, setError } from "../utils/appSlice";
 import Footer from "./Footer";
 
 const Body = () => {
-  const user = useSelector((store) => store.user);
+  const user = useSelector(selectCurrentUser);
+  const status = useSelector(selectAppStatus);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const fetchProfile = async () => {
+    dispatch(setLoading());
     try {
       const { data } = await axios.get(`${Api_Url}/profile/view`, {
         withCredentials: true,
@@ -22,30 +24,47 @@ const Body = () => {
       });
 
       if (data?.success) {
-        dispatch(addUser(data.user));
+        const userWithImage = {
+          ...data.user,
+          profileImageUrl: data.user.profileImage
+            ? data.user.profileImage.startsWith("http")
+              ? data.user.profileImage
+              : `${Api_Url}/uploads/${data.user.profileImage}`
+            : "/default-profile.jpg",
+        };
+        dispatch(setUser(userWithImage));
       } else {
-        document.cookie =
-          "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-        navigate("/login");
+        handleLogout();
       }
     } catch (error) {
       console.error("Profile fetch error:", error);
+      dispatch(setError(error.message));
 
       if (error.response?.status === 401) {
-        document.cookie =
-          "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-        navigate("/login");
-      } else {
-        console.error("Failed to fetch profile:", error.message);
+        handleLogout();
       }
     }
   };
 
+  const handleLogout = () => {
+    document.cookie = "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    dispatch(clearUser());
+    navigate("/login");
+  };
+
   useEffect(() => {
-    if (!user) {
+    if (!user && status !== "loading") {
       fetchProfile();
     }
-  }, []);
+  }, [user, status]);
+
+  if (status === "loading") {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-200 to-gray-300">
