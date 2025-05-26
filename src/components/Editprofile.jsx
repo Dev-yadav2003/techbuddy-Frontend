@@ -48,14 +48,17 @@ const EditProfile = () => {
     try {
       const formDataToSend = new FormData();
 
+      // Append all form fields
       Object.entries(formData).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
+          // Convert skills back to array if needed
           const finalValue =
             key === "skills" ? value.split(",").map((s) => s.trim()) : value;
           formDataToSend.append(key, finalValue);
         }
       });
 
+      // Append file if selected
       if (profileFile) {
         formDataToSend.append("profileImage", profileFile);
       }

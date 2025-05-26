@@ -1,49 +1,26 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  user: null,
-  status: "idle",
-  error: null,
-};
-
-const appSlice = createSlice({
-  name: "app",
-  initialState,
+const userSlice = createSlice({
+  name: "user",
+  initialState: null,
   reducers: {
-    setUser: (state, action) => {
-      state.user = action.payload;
-      state.status = "succeeded";
+    addUser: (state, action) => {
+      return action.payload;
     },
-    clearUser: (state) => {
-      state.user = null;
-      state.status = "idle";
+    removeUser: (state, action) => {
+      return null;
     },
-    updateUserProfileImage: (state, action) => {
-      if (state.user) {
-        state.user.profileImage = action.payload;
-        state.user.profileImageUrl = `${action.payload}?t=${Date.now()}`;
+    updateProfileImage: (state, action) => {
+      if (state) {
+        return {
+          ...state,
+          profileImageUrl: action.payload,
+        };
       }
-    },
-    setLoading: (state) => {
-      state.status = "loading";
-    },
-    setError: (state, action) => {
-      state.error = action.payload;
-      state.status = "failed";
+      return state;
     },
   },
 });
 
-export const {
-  setUser,
-  clearUser,
-  updateUserProfileImage,
-  setLoading,
-  setError,
-} = appSlice.actions;
-
-export const selectCurrentUser = (state) => state.app.user;
-export const selectAppStatus = (state) => state.app.status;
-export const selectAppError = (state) => state.app.error;
-
-export default appSlice.reducer;
+export const { addUser, removeUser, updateProfileImage } = userSlice.actions;
+export default userSlice.reducer;
