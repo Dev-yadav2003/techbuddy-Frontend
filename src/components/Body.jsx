@@ -21,7 +21,7 @@ const Body = () => {
         },
       });
 
-      if (data?.success) {
+      if (data?.user) {
         dispatch(addUser(data.user));
       } else {
         document.cookie =
