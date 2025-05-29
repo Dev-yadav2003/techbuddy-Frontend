@@ -20,8 +20,6 @@ const Body = () => {
         },
       });
 
-      console.log("Fetched user data:", res.data); // ✅ debug log
-
       const userData = res.data;
 
       if (userData && userData._id) {
