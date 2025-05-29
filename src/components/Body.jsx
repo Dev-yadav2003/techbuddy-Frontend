@@ -13,7 +13,7 @@ const Body = () => {
 
   const fetchProfile = async () => {
     try {
-      const { data } = await axios.get(`${Api_Url}/profile/view`, {
+      const res = await axios.get(`${Api_Url}/profile/view`, {
         withCredentials: true,
         headers: {
           Accept: "application/json",
@@ -21,10 +21,17 @@ const Body = () => {
         },
       });
 
-      dispatch(addUser(data.user));
+      const userData = res.data;
+
+      if (userData && userData._id) {
+        dispatch(addUser(userData));
+      } else {
+        document.cookie =
+          "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+        navigate("/login");
+      }
     } catch (error) {
       console.error("Profile fetch error:", error);
-
       if (error.response?.status === 401) {
         document.cookie =
           "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
@@ -36,7 +43,9 @@ const Body = () => {
   };
 
   useEffect(() => {
-    fetchProfile();
+    if (!user || !user._id) {
+      fetchProfile();
+    }
   }, []);
 
   return (
