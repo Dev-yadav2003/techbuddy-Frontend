@@ -21,13 +21,7 @@ const Body = () => {
         },
       });
 
-      if (data?.user) {
-        dispatch(addUser(data.user));
-      } else {
-        document.cookie =
-          "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-        navigate("/login");
-      }
+      dispatch(addUser(data.user));
     } catch (error) {
       console.error("Profile fetch error:", error);
 
