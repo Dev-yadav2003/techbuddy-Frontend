@@ -35,7 +35,7 @@ const Feed = () => {
           <img
             className=" w-64 h-64"
             alt="no user image"
-            src="public\noUserFound.webp"
+            src="/noUserFound.webp"
           />
         </div>
       </div>

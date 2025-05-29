@@ -47,13 +47,13 @@ const EditProfile = ({ user }) => {
 
   useEffect(() => {
     if (user) {
-      setFirstName(user.firstName || "");
-      setLastName(user.lastName || "");
-      setSkills(user.skills || "");
-      setAge(user.age || "");
-      setGender(user.gender || "");
-      setProfile(user.profile || "");
-      setAbout(user.about || "");
+      setFirstName(user?.firstName || "");
+      setLastName(user?.lastName || "");
+      setSkills(user?.skills || "");
+      setAge(user?.age || "");
+      setGender(user?.gender || "");
+      setProfile(user?.profile || "");
+      setAbout(user?.about || "");
     }
   }, [user]);
 

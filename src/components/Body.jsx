@@ -42,9 +42,7 @@ const Body = () => {
   };
 
   useEffect(() => {
-    if (!user) {
-      fetchProfile();
-    }
+    fetchProfile();
   }, []);
 
   return (

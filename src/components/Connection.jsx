@@ -26,7 +26,17 @@ const Connection = () => {
 
   if (!connection) return;
   if (connection.length === 0) {
-    return <p className="text-center text-3xl mt-10">No Connection Found</p>;
+    return (
+      <div className="flex flex-col items-center justify-center gap-7">
+        <p className="text-gray-500 mt-4 text-3xl font-bold">No Connections</p>
+
+        <img
+          alt="No connection found"
+          src="/noConnections.jpg.png"
+          className="w-64 h-auto"
+        />
+      </div>
+    );
   }
 
   return (
