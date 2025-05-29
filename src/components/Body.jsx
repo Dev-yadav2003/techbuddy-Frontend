@@ -2,12 +2,11 @@ import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Api_Url } from "../utils/constants";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { addUser } from "../utils/appSlice";
 import Footer from "./Footer";
 
 const Body = () => {
-  const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -20,6 +19,8 @@ const Body = () => {
           "Content-Type": "application/json",
         },
       });
+
+      console.log("Fetched user data:", res.data); // ✅ debug log
 
       const userData = res.data;
 
@@ -43,9 +44,7 @@ const Body = () => {
   };
 
   useEffect(() => {
-    if (!user || !user._id) {
-      fetchProfile();
-    }
+    fetchProfile();
   }, []);
 
   return (
