@@ -65,7 +65,7 @@ const EditProfile = ({ user }) => {
         Edit Your Profile
       </div>
       <div className="flex w-full justify-center gap-10">
-        <div className="flex flex-col items-center w-full ">
+        <div className="flex flex-col items-center w-full">
           <div className="flex flex-col md:w-full w-3/4 gap-6 mt-10 border-2 border-blue-500 p-6 rounded-lg shadow-lg">
             <div className="flex flex-col gap-2">
               <label className="text-lg font-semibold text-blue-900">
@@ -156,7 +156,8 @@ const EditProfile = ({ user }) => {
                 onChange={(e) => setAbout(e.target.value)}
               ></textarea>
             </div>
-            <p className=" text-red-500">{error}</p>
+
+            <p className="text-red-500">{error}</p>
             <button
               className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition"
               onClick={saveProfile}
@@ -165,6 +166,7 @@ const EditProfile = ({ user }) => {
             </button>
           </div>
         </div>
+
         <div className="mt-[6vh] hidden md:block w-full">
           <ProfileCard
             user={{
@@ -174,11 +176,14 @@ const EditProfile = ({ user }) => {
               age,
               about,
               skills,
-              profile: user?.profile,
+              profile: profile
+                ? URL.createObjectURL(profile)
+                : `${Api_Url}${user?.profile}`,
             }}
           />
         </div>
       </div>
+
       {toast && (
         <div className="toast toast-top toast-center">
           <div className="alert alert-success">
