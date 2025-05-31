@@ -11,37 +11,40 @@ const EditProfile = ({ user }) => {
   const [skills, setSkills] = useState(user?.skills || "");
   const [age, setAge] = useState(user?.age || "");
   const [gender, setGender] = useState(user?.gender || "");
-  const [profile, setProfile] = useState(user?.profile || "");
+  const [profile, setProfile] = useState(null);
   const [about, setAbout] = useState(user?.about || "");
   const [error, setError] = useState("");
   const [toast, setToast] = useState(false);
   const dispatch = useDispatch();
 
   const saveProfile = async () => {
-    setError(" ");
+    setError("");
     try {
-      const res = await axios.patch(
-        Api_Url + "/profile/edit",
-        {
-          firstName,
-          lastName,
-          skills,
-          age,
-          gender,
-          profile,
-          about,
+      const formData = new FormData();
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("skills", skills);
+      formData.append("age", age);
+      formData.append("gender", gender);
+      formData.append("about", about);
+      if (profile) {
+        formData.append("profileImage", profile);
+      }
+
+      const res = await axios.patch(`${Api_Url}/profile/edit`, formData, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-        {
-          withCredentials: true,
-        }
-      );
+      });
+
       dispatch(addUser(res?.data?.data));
       setToast(true);
       setTimeout(() => {
         setToast(false);
       }, 3000);
     } catch (err) {
-      setError(err?.response?.data);
+      setError(err?.response?.data || "Something went wrong");
     }
   };
 
@@ -52,7 +55,6 @@ const EditProfile = ({ user }) => {
       setSkills(user?.skills || "");
       setAge(user?.age || "");
       setGender(user?.gender || "");
-      setProfile(user?.profile || "");
       setAbout(user?.about || "");
     }
   }, [user]);
@@ -130,14 +132,16 @@ const EditProfile = ({ user }) => {
 
             <div className="flex flex-col gap-2">
               <label className="text-lg font-semibold text-blue-900">
-                Profile
+                Profile Image
               </label>
               <input
-                type="text"
-                placeholder="Enter profile info"
-                className="input w-full bg-blue-700 text-white p-3 rounded-lg"
-                value={profile}
-                onChange={(e) => setProfile(e.target.value)}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  setProfile(file);
+                }}
+                className="bg-white text-black p-2 rounded-lg"
               />
             </div>
 
@@ -163,7 +167,15 @@ const EditProfile = ({ user }) => {
         </div>
         <div className="mt-[6vh] hidden md:block w-full">
           <ProfileCard
-            user={{ firstName, lastName, gender, age, about, skills, profile }}
+            user={{
+              firstName,
+              lastName,
+              gender,
+              age,
+              about,
+              skills,
+              profile: user?.profile,
+            }}
           />
         </div>
       </div>
