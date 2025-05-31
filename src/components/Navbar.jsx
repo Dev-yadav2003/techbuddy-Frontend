@@ -48,7 +48,7 @@ function Navbar() {
               whileTap={{ scale: 0.9 }}
             >
               <img
-                src={user?.profile ? user.profile : "/download.png"}
+                src={`${Api_Url}${user?.profile}`}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
