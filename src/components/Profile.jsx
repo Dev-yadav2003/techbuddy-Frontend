@@ -4,11 +4,7 @@ import Editprofile from "./Editprofile";
 const Profile = () => {
   const user = useSelector((store) => store.user);
 
-  return (
-    <div>
-      <Editprofile user={user} />
-    </div>
-  );
+  return <Editprofile user={user} />;
 };
 
 export default Profile;

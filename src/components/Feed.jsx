@@ -1,52 +1,78 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
-import { Api_Url } from "../utils/constants";
+import { api, getErrorMessage } from "../utils/api";
 import { addFeed } from "../utils/feedSlice";
 import UserCard from "./UserCard";
+import Loader from "./Loader";
+import EmptyState from "./EmptyState";
 
 const Feed = () => {
   const feed = useSelector((store) => store.feed);
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  // True once the backend says there is nobody left to show.
+  const [exhausted, setExhausted] = useState(false);
 
-  const getFeed = async () => {
-    if (feed !== null) return;
+  const getFeed = useCallback(async () => {
+    setLoading(true);
+    setError("");
     try {
-      const res = await axios.get(Api_Url + "/user/feed", {
-        withCredentials: true,
-      });
-      dispatch(addFeed(res?.data?.data));
+      const res = await api.get("/user/feed");
+      const users = res.data?.data || [];
+      setExhausted(users.length === 0);
+      dispatch(addFeed(users));
     } catch (err) {
-      console.error(err.message);
+      setError(getErrorMessage(err, "Could not load the feed"));
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [dispatch]);
 
-  const user = useSelector((store) => store.user);
-
+  // Load the first page, and the next one whenever the current page is used up.
   useEffect(() => {
-    if (user) getFeed();
-  }, [user]);
+    if (loading || error) return;
+    if (feed === null || (feed.length === 0 && !exhausted)) getFeed();
+  }, [feed, exhausted, loading, error, getFeed]);
 
-  if (!feed || feed.length === 0) {
+  if (error) {
     return (
-      <div className="flex justify-center items-center flex-col">
-        <h1 className="text-3xl font-bold my-10">No new users found!</h1>
-        <div>
-          <img
-            className=" w-64 h-64"
-            alt="no user image"
-            src="/noUserFound.webp"
-          />
+      <div className="flex flex-col items-center gap-4 py-20">
+        <div role="alert" className="alert alert-error max-w-md">
+          <span>{error}</span>
         </div>
+        <button className="btn btn-primary" onClick={getFeed}>
+          Try again
+        </button>
       </div>
     );
   }
+
+  if (!feed || feed.length === 0) {
+    if (loading || !exhausted) return <Loader label="Finding developers..." />;
+    return (
+      <EmptyState
+        image="/noUserFound.webp"
+        title="You're all caught up!"
+        text="There are no new developers to show right now. Check back later."
+      >
+        <button className="btn btn-primary btn-outline" onClick={getFeed}>
+          Refresh
+        </button>
+      </EmptyState>
+    );
+  }
+
   return (
-    feed && (
-      <div className="flex justify-center my-10">
-        <UserCard user={feed[0]} />
+    <div className="flex flex-col items-center gap-4">
+      <div className="text-center">
+        <h1 className="text-3xl font-extrabold">Discover developers</h1>
+        <p className="text-base-content/60 mt-1">
+          Swipe right or tap <b>Interested</b> to connect, swipe left to skip.
+        </p>
       </div>
-    )
+      <UserCard key={feed[0]._id} user={feed[0]} />
+    </div>
   );
 };
 
