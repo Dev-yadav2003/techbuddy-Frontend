@@ -1,32 +1,87 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { createSocketConnection } from "../utils/socket";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Api_Url } from "../utils/constants";
+import { createSocketConnection } from "../utils/socket";
+import {
+  api,
+  getErrorMessage,
+  getImageUrl,
+  handleImageError,
+} from "../utils/api";
+import Loader from "./Loader";
+
+// Merge two message lists, dropping duplicates (a live message can arrive
+// before the history request finishes).
+const mergeMessages = (a, b) => {
+  const seen = new Set();
+  return [...a, ...b].filter((msg) => {
+    if (seen.has(msg._id)) return false;
+    seen.add(msg._id);
+    return true;
+  });
+};
+
+const formatTime = (timestamp) =>
+  new Date(timestamp).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
 const Chat = () => {
   const { targetUserId } = useParams();
   const user = useSelector((store) => store.user);
   const userId = user?._id;
 
-  const [message, setMessage] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [targetUser, setTargetUser] = useState(null);
   const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [connected, setConnected] = useState(false);
 
   const socketRef = useRef(null);
   const chatBoxRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError("");
+    setMessages([]);
+    api
+      .get(`/chat/${targetUserId}`)
+      .then((res) => {
+        if (cancelled) return;
+        setTargetUser(res.data.targetUser);
+        setMessages((prev) => mergeMessages(res.data.messages, prev));
+      })
+      .catch((err) => !cancelled && setError(getErrorMessage(err)))
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [targetUserId]);
+
   useEffect(() => {
     if (!userId) return;
 
     const socket = createSocketConnection();
     socketRef.current = socket;
 
-    socket.emit("joinChat", { userId, targetUserId });
-
-    socket.on("messageRecieved", ({ firstName, text, timestamp, senderId }) => {
-      setMessage((prev) => [...prev, { text, firstName, timestamp, senderId }]);
+    // (Re)join the room on every connect so reconnects keep working.
+    socket.on("connect", () => {
+      setConnected(true);
+      socket.emit("joinChat", { targetUserId });
     });
+    socket.on("disconnect", () => setConnected(false));
+    socket.on("connect_error", () => setConnected(false));
+    socket.on("messageReceived", (msg) => {
+      setMessages((prev) => mergeMessages(prev, [msg]));
+    });
+    socket.on("chatError", ({ error }) => setError(error));
 
     return () => {
       socket.disconnect();
+      socketRef.current = null;
     };
   }, [userId, targetUserId]);
 
@@ -34,98 +89,137 @@ const Chat = () => {
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
-  }, [message]);
+  }, [messages]);
 
-  const sendMessage = () => {
+  const sendMessage = (e) => {
+    e.preventDefault();
     const socket = socketRef.current;
-    if (!socket || !newMessage.trim()) return;
+    const text = newMessage.trim();
+    if (!socket || !text) return;
 
-    const timestamp = new Date().toISOString();
-    socket.emit("sendMessage", {
-      userId,
-      targetUserId,
-      timestamp,
-      text: newMessage,
-      firstName: user?.firstName,
-      senderId: userId,
-    });
-
+    socket.emit("sendMessage", { targetUserId, text });
     setNewMessage("");
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-  const imageUrl = user?.profile;
+  if (loading) return <Loader label="Loading chat..." />;
+
+  if (!targetUser) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-20">
+        <div role="alert" className="alert alert-error max-w-md">
+          <span>{error || "Chat not available"}</span>
+        </div>
+        <Link to="/connections" className="btn btn-primary">
+          Back to connections
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col border-blue-800 border-2 rounded-xl md:w-1/2 mx-auto mt-10 bg-gradient-to-br from-blue-950 to-blue-900 shadow-lg h-[400px]">
-      <div className="bg-cyan-900 text-white text-center py-3 rounded-t-xl border-b border-blue-700">
-        <h1 className="text-2xl font-bold">Chat Box</h1>
+    <div className="card bg-base-100 border border-base-300 shadow-sm max-w-3xl mx-auto h-[calc(100vh-12rem)] min-h-[420px] overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-base-300">
+        <Link
+          to="/connections"
+          className="btn btn-ghost btn-sm btn-circle"
+          aria-label="Back to connections"
+        >
+          ←
+        </Link>
+        <div className="avatar">
+          <div className="w-10 rounded-full">
+            <img
+              src={getImageUrl(targetUser.profile)}
+              onError={handleImageError}
+              alt=""
+            />
+          </div>
+        </div>
+        <div className="min-w-0">
+          <h1 className="font-semibold truncate">
+            {targetUser.firstName} {targetUser.lastName}
+          </h1>
+          <p className="text-xs text-base-content/60 flex items-center gap-1">
+            <span
+              className={`inline-block w-2 h-2 rounded-full ${
+                connected ? "bg-success" : "bg-base-300"
+              }`}
+            ></span>
+            {connected ? "Connected" : "Connecting..."}
+          </p>
+        </div>
       </div>
 
       <div
         ref={chatBoxRef}
-        className="flex-1 overflow-y-auto px-4 py-3 space-y-4 scrollbar-thin scrollbar-thumb-blue-700 scrollbar-track-blue-300"
+        className="flex-1 overflow-y-auto px-4 py-4 bg-base-200/50"
       >
-        {message.map((msg, index) => {
-          const isOwnMessage = msg.senderId === userId;
-          const avatar = isOwnMessage ? imageUrl : "/default-avatar.png";
-
-          return (
-            <div
-              key={index}
-              className={`chat ${isOwnMessage ? "chat-end" : "chat-start"}`}
-            >
-              <div className="chat-image avatar">
+        {messages.length === 0 ? (
+          <p className="text-center text-base-content/50 mt-10">
+            No messages yet. Say hi to {targetUser.firstName}!
+          </p>
+        ) : (
+          messages.map((msg) => {
+            const isOwnMessage = msg.senderId === userId;
+            const sender = isOwnMessage ? user : targetUser;
+            return (
+              <div
+                key={msg._id}
+                className={`chat ${isOwnMessage ? "chat-end" : "chat-start"}`}
+              >
+                <div className="chat-image avatar">
+                  <div className="w-8 rounded-full">
+                    <img
+                      alt=""
+                      src={getImageUrl(sender.profile)}
+                      onError={handleImageError}
+                    />
+                  </div>
+                </div>
                 <div
-                  className={`w-10 rounded-full ring-2 ${
-                    isOwnMessage ? "ring-blue-300" : "ring-blue-400"
+                  className={`chat-bubble break-words ${
+                    isOwnMessage
+                      ? "chat-bubble-primary"
+                      : "bg-base-100 text-base-content"
                   }`}
                 >
-                  <img
-                    alt="avatar"
-                    src={avatar}
-                  />
+                  {msg.text}
+                </div>
+                <div className="chat-footer opacity-50 text-xs mt-1">
+                  {formatTime(msg.timestamp)}
                 </div>
               </div>
-              <div className="chat-header text-blue-200 font-medium">
-                {msg.firstName}
-                <time className="text-xs text-blue-400 ml-2">
-                  {new Date(msg.timestamp).toLocaleTimeString()}
-                </time>
-              </div>
-              <div
-                className={`chat-bubble ${
-                  isOwnMessage ? "bg-blue-300" : "bg-blue-200"
-                } text-blue-900 font-medium shadow-md`}
-              >
-                {msg.text}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
-      <div className="flex items-center gap-2 p-3 bg-cyan-950 rounded-b-xl border-t border-blue-800">
+      {error && (
+        <div className="px-4 py-2 text-sm text-error border-t border-base-300">
+          {error}
+        </div>
+      )}
+
+      <form
+        onSubmit={sendMessage}
+        className="flex items-center gap-2 p-3 border-t border-base-300"
+      >
         <input
           type="text"
           value={newMessage}
+          maxLength={2000}
           onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
           placeholder="Type a message..."
-          className="flex-1 px-4 py-2 rounded-md bg-blue-100 text-blue-900 placeholder-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="input input-bordered flex-1"
         />
         <button
-          onClick={sendMessage}
-          className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition duration-150"
+          type="submit"
+          className="btn btn-primary"
+          disabled={!connected || !newMessage.trim()}
         >
           Send
         </button>
-      </div>
+      </form>
     </div>
   );
 };

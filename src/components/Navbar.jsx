@@ -1,10 +1,16 @@
-import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { Api_Url } from "../utils/constants";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { removeUser } from "../utils/appSlice";
-import { removeFeed } from "../utils/feedSlice";
-import { motion } from "framer-motion";
+import { api, getImageUrl, handleImageError } from "../utils/api";
+
+const NAV_LINKS = [
+  { to: "/", label: "Feed", end: true },
+  { to: "/connections", label: "Connections" },
+  { to: "/requests", label: "Requests" },
+];
+
+// daisyUI dropdowns open on focus, so blur to close them after a click.
+const closeDropdown = () => document.activeElement?.blur();
 
 function Navbar() {
   const user = useSelector((store) => store.user);
@@ -13,75 +19,71 @@ function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await axios.post(Api_Url + "/logout", {}, { withCredentials: true });
-      dispatch(removeUser());
-      dispatch(removeFeed());
-      navigate("/login");
+      await api.post("/logout");
     } catch (err) {
       console.error("Logout failed:", err.message);
     }
+    navigate("/login");
+    dispatch(removeUser());
   };
 
   return (
-    <motion.div
-      className="relative w-full z-50 bg-white-200 backdrop-blur-md shadow-md px-5 py-5 flex justify-between items-center"
-      initial={{ opacity: 0, y: -30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Link
-        to="/"
-        className="text-2xl font-bold text-gray-800 tracking-wide"
-      >
-        Tech<span className="text-blue-500">Buddy</span>
-      </Link>
+    <header className="navbar sticky top-0 z-50 min-h-16 bg-base-100/90 backdrop-blur border-b border-base-300 px-4 md:px-8">
+      <div className="flex-1">
+        <Link to="/" className="text-2xl font-extrabold tracking-tight">
+          Tech<span className="text-primary">Buddy</span>
+        </Link>
+      </div>
 
       {user && (
-        <div className="flex items-center gap-5">
-          <p className="text-lg text-white font-bold">
-            {user?.firstName} {user?.lastName}
-          </p>
+        <div className="flex-none flex items-center gap-2">
+          <ul className="menu menu-horizontal hidden md:flex gap-1 px-1">
+            {NAV_LINKS.map((link) => (
+              <li key={link.to}>
+                <NavLink to={link.to} end={link.end}>
+                  {link.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
 
-          <div className="relative group z-50 ">
-            <motion.div
-              className="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-500 shadow-lg cursor-pointer transition-all duration-300 group-hover:scale-110 group-hover:shadow-blue-300"
-              whileTap={{ scale: 0.9 }}
+          <div className="dropdown dropdown-end">
+            <div
+              tabIndex={0}
+              role="button"
+              aria-label="Open account menu"
+              className="btn btn-ghost btn-circle avatar"
             >
-              <img
-                src={`${Api_Url}${user?.profile}`}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            </motion.div>
-
-            <ul className="absolute right-0 top-full mt-3 w-44 bg-indigo-400 shadow-xl rounded-lg p-2 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 z-50">
+              <div className="w-10 rounded-full ring ring-primary ring-offset-2 ring-offset-base-100">
+                <img
+                  src={getImageUrl(user.profile)}
+                  onError={handleImageError}
+                  alt="Your profile"
+                />
+              </div>
+            </div>
+            <ul
+              tabIndex={0}
+              onClick={closeDropdown}
+              className="menu dropdown-content mt-3 w-56 p-2 bg-base-100 rounded-box shadow-lg border border-base-300 z-[60]"
+            >
+              <li className="menu-title">
+                <span className="truncate">
+                  {user.firstName} {user.lastName}
+                </span>
+              </li>
+              {NAV_LINKS.map((link) => (
+                <li key={link.to} className="md:hidden">
+                  <NavLink to={link.to} end={link.end}>
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
               <li>
-                <Link
-                  to="/profile"
-                  className="block px-4 py-2 hover:text-slate-900 hover:bg-blue-200 rounded-md"
-                >
-                  Profile
-                </Link>
+                <NavLink to="/profile">Edit profile</NavLink>
               </li>
               <li>
-                <Link
-                  to="/connections"
-                  className="block w-full hover:text-slate-900 text-left px-4 py-2 hover:bg-blue-100 rounded-md"
-                >
-                  Connections
-                </Link>
-                <Link
-                  to="/requests"
-                  className="block w-full text-left px-4 py-2 hover:text-slate-900 hover:bg-blue-100 rounded-md"
-                >
-                  Requests
-                </Link>
-              </li>
-              <li>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 rounded-md"
-                >
+                <button onClick={handleLogout} className="text-error">
                   Logout
                 </button>
               </li>
@@ -89,7 +91,7 @@ function Navbar() {
           </div>
         </div>
       )}
-    </motion.div>
+    </header>
   );
 }
 

@@ -1,58 +1,56 @@
-import React, { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { Api_Url } from "../utils/constants";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { api, getErrorMessage } from "../utils/api";
 import { addUser } from "../utils/appSlice";
 import Footer from "./Footer";
+import Loader from "./Loader";
 
+// Layout for every logged-in page. Loads the current user first and sends
+// the visitor to /login when the session is missing or expired.
 const Body = () => {
+  const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
+    setError("");
     try {
-      const res = await axios.get(`${Api_Url}/profile/view`, {
-        withCredentials: true,
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
-
-      const userData = res.data;
-
-      if (userData && userData._id) {
-        dispatch(addUser(userData));
+      const res = await api.get("/profile/view");
+      dispatch(addUser(res.data));
+    } catch (err) {
+      if (err.response?.status === 401) {
+        navigate("/login", { replace: true });
       } else {
-        document.cookie =
-          "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-        navigate("/login");
-      }
-    } catch (error) {
-      console.error("Profile fetch error:", error);
-      if (error.response?.status === 401) {
-        document.cookie =
-          "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-        navigate("/login");
-      } else {
-        console.error("Failed to fetch profile:", error.message);
+        setError(getErrorMessage(err, "Failed to load your profile"));
       }
     }
-  };
+  }, [dispatch, navigate]);
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (!user) fetchProfile();
+  }, [user, fetchProfile]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-200 to-gray-300">
-      <main className="flex-grow container mx-auto px-4 md:px-8 lg:px-16 py-6">
-        <Outlet />
+    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
+      <main className="flex-grow w-full max-w-6xl mx-auto px-4 md:px-8 py-8">
+        {user ? (
+          <Outlet />
+        ) : error ? (
+          <div className="flex flex-col items-center gap-4 py-20 text-center">
+            <div role="alert" className="alert alert-error max-w-md">
+              <span>{error}</span>
+            </div>
+            <button className="btn btn-primary" onClick={fetchProfile}>
+              Try again
+            </button>
+          </div>
+        ) : (
+          <Loader />
+        )}
       </main>
-      <div className="bg-blue-400 text-white shadow-md">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 };
